@@ -811,7 +811,7 @@
                         <h2>ALTA DEMANDA</h2>
                         <p>Aguarde alguns segundos para tentar novamente.</p>
                         <button class="q-btn-outline" id="q-error-back">Voltar ao Produto</button>
-                        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);"><p style="font-size:12px;color:var(--c-muted);margin:0 0 8px;">Continua com problema? Fale direto com a Provou Levou:</p><a href="https://wa.me/5511965749173?text=Ol%C3%A1!%20Tive%20um%20problema%20ao%20usar%20o%20provador." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:7px;background:#25D366;color:#fff;border-radius:10px;padding:10px 18px;font-family:inherit;font-weight:700;font-size:13px;text-decoration:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 2.1.55 4.06 1.6 5.8L2 22l4.44-1.65a9.9 9.9 0 0 0 5.6 1.72h.01c5.46 0 9.9-4.45 9.9-9.9C21.95 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.34-.5.05-1.13.07-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.8-4.17-4.94-4.36-.15-.19-1.18-1.57-1.18-2.99 0-1.42.75-2.12 1.01-2.41.27-.29.58-.36.77-.36l.55.01c.18.01.42-.07.66.5.24.59.83 2.04.9 2.18.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.44.29.15.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.39-.24.66-.14.27.1 1.7.8 1.99.95.29.15.48.22.55.34.07.12.07.71-.17 1.39z"/></svg> Falar com a Provou Levou</a></div>
+                        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);"><p style="font-size:12px;color:var(--c-muted);margin:0 0 8px;">Continua com problema? Fale direto com a Provou Levou:</p><a href="https://wa.me/5511938034714?text=Ol%C3%A1!%20Tive%20um%20problema%20ao%20usar%20o%20provador." target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:7px;background:#25D366;color:#fff;border-radius:10px;padding:10px 18px;font-family:inherit;font-weight:700;font-size:13px;text-decoration:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 2.1.55 4.06 1.6 5.8L2 22l4.44-1.65a9.9 9.9 0 0 0 5.6 1.72h.01c5.46 0 9.9-4.45 9.9-9.9C21.95 6.45 17.5 2 12.04 2zm5.8 14.15c-.24.68-1.4 1.3-1.94 1.34-.5.05-1.13.07-1.82-.11-.42-.13-.96-.31-1.65-.61-2.9-1.25-4.8-4.17-4.94-4.36-.15-.19-1.18-1.57-1.18-2.99 0-1.42.75-2.12 1.01-2.41.27-.29.58-.36.77-.36l.55.01c.18.01.42-.07.66.5.24.59.83 2.04.9 2.18.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.44.29.15.46.12.63-.07.17-.19.72-.84.91-1.13.19-.29.39-.24.66-.14.27.1 1.7.8 1.99.95.29.15.48.22.55.34.07.12.07.71-.17 1.39z"/></svg> Falar com a Provou Levou</a></div>
                     </div>
 
                 </div>
@@ -1089,68 +1089,7 @@
         function plSid() { try { var s = localStorage.getItem('pl_sid'); if (!s) { s = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('pl_sid', s); } return s; } catch (e) { return 'nostore'; } }
         function plTrackOpen() { try { fetch(WEBHOOK_OPEN_PL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: plSid(), origin: location.origin, produto: (document.querySelector('h1.product-name, h1.product__title, .product-single__title, h1') || {}).innerText || document.title || '' }) }).catch(function () {}); } catch (e) {} }
         function plTrackProved(rawPhone) { try { var d = (rawPhone || '').replace(/\D/g, ''); if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2); fetch(WEBHOOK_OPEN_PL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: plSid(), proved: true, telefone_cliente: d || null }) }).catch(function () {}); } catch (e) {} }
-        // ── Detecção de rosto: foto do óculos no rosto vira a referência principal ──
-        // Roda no navegador (FaceDetector nativo do Chromium; fallback MediaPipe via CDN).
-        // Varre a galeria do produto (extractImages) e coleta as fotos com rosto. Fallback
-        // seguro: se nada detectar ou der erro, mantém as fotos default — sem regressão.
-        var faceDetectPromise = null, _faceUrls = [], _faceDet = null, _faceDetTried = false;
-        async function getFaceDetector() {
-            if (_faceDetTried) return _faceDet;
-            _faceDetTried = true;
-            try {
-                if ('FaceDetector' in window) { _faceDet = { native: new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 }) }; return _faceDet; }
-            } catch (e) {}
-            try {
-                var vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/vision_bundle.mjs');
-                var fileset = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm');
-                var det = await vision.FaceDetector.createFromOptions(fileset, {
-                    baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite' },
-                    runningMode: 'IMAGE'
-                });
-                _faceDet = { mp: det };
-            } catch (e) { _faceDet = null; }
-            return _faceDet;
-        }
-        function _plLoadCorsImg(url) {
-            return new Promise(function (resolve) {
-                var img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = function () { resolve(img); };
-                img.onerror = function () { resolve(null); };
-                img.src = url;
-            });
-        }
-        async function _plImgHasFace(det, img) {
-            try {
-                if (det.native) { var f = await det.native.detect(img); return !!(f && f.length); }
-                if (det.mp) { var r = det.mp.detect(img); return !!(r && r.detections && r.detections.length); }
-            } catch (e) {}
-            return false;
-        }
-        async function _plDetectFaces(urls) {
-            if (!urls || !urls.length) return _faceUrls;
-            var det = await getFaceDetector();
-            if (!det) return _faceUrls;
-            for (var i = 0; i < urls.length && _faceUrls.length < 4; i++) {
-                var img = await _plLoadCorsImg(urls[i]);
-                if (!img) continue;
-                if (await _plImgHasFace(det, img)) _faceUrls.push(urls[i]);
-            }
-            return _faceUrls;
-        }
-        function startFaceDetect() {
-            if (faceDetectPromise) return faceDetectPromise;
-            var _urls = [];
-            try { if (typeof extractImages === 'function') _urls = extractImages().slice(0, 12); } catch (e) {}
-            faceDetectPromise = _plDetectFaces(_urls).then(function (arr) {
-                if (arr && arr.length) { try { console.log('[PL] fotos no rosto detectadas:', arr.length); } catch (e) {} }
-                return arr;
-            }).catch(function () { return _faceUrls; });
-            return faceDetectPromise;
-        }
-
         function openModal() {
-            try { startFaceDetect(); } catch (e) {}
             plTrackOpen();
             // Lazy-load Phosphor Icons na primeira abertura
             if (!window.phosphorIconsLoaded) {
@@ -1172,8 +1111,7 @@
             // --- volta pra tela inicial ao fechar (pos-prova) + limpa input p/ 2a foto enviar ---
             try {
                 var _qsr = document.getElementById('q-step-result'); if (_qsr) _qsr.style.display = 'none';
-                var _qsp = (typeof photoStep !== 'undefined' && photoStep) ? photoStep : document.getElementById('q-step-photo');
-                if (_qsp) _qsp.style.display = 'flex';
+                if (typeof photoStep !== 'undefined' && photoStep) photoStep.style.display = 'flex';
                 var _qcard = document.querySelector('.q-card-ia'); if (_qcard) _qcard.classList.remove('is-result');
                 if (typeof userPhoto !== 'undefined') userPhoto = null;
                 if (typeof pixPaymentId !== 'undefined') pixPaymentId = null;
@@ -1648,32 +1586,12 @@ const fd = new FormData();
                         }
                     }
                 } catch (_) {}
-                    // Detecção de rosto: manda 1 foto no rosto como PRINCIPAL (o gerador usa pra
-                    // calibrar a proporção/tamanho do óculos) + as fotos de fundo branco (packshot),
-                    // que mostram os detalhes da armação. Assim garante proporção E detalhe.
-                    // Sem rosto detectado → mantém as fotos default (fallback, sem regressão).
-                    try {
-                        if (faceDetectPromise) { await Promise.race([faceDetectPromise, new Promise(function (r) { setTimeout(r, 4000); })]); }
-                        if (_faceUrls && _faceUrls.length) {
-                            var _key = function (u) { return String(u || '').split('?')[0]; };
-                            var _faceKeys = {};
-                            _faceUrls.forEach(function (u) { _faceKeys[_key(u)] = 1; });
-                            var _packshots = allProdImgs.filter(function (u) { return !_faceKeys[_key(u)]; });
-                            var _mix = [];
-                            var _add = function (u) { if (u && !_mix.some(function (x) { return _key(x) === _key(u); })) _mix.push(u); };
-                            _add(_faceUrls[0]);
-                            _packshots.forEach(_add);
-                            _faceUrls.slice(1).forEach(_add);
-                            allProdImgs.forEach(_add);
-                            allProdImgs = _mix;
-                        }
-                    } catch (e) {}
                 allProdImgs = allProdImgs.slice(0, 4);
                 console.log('[PL Univisao] Enviando', allProdImgs.length, 'fotos do produto');
                 for (let _pi = 0; _pi < allProdImgs.length; _pi++) {
                     try {
                         const _b = await fetch(allProdImgs[_pi]).then(r => r.blob());
-                            if (!_b || !/^image\//i.test(_b.type)) continue; // pula HTML/nao-imagem
+                            if (!_b || !/^image\//i.test(_b.type)) continue; // pula HTML/nao-imagem -> evita 400 do gerador (ALTA DEMANDA)
                         if (_pi === 0) {
                             fd.append('product_image', _b, 'product.jpg');
                         } else {
