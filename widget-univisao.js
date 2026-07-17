@@ -1537,6 +1537,7 @@
 
         // ── GERAÇÃO PRINCIPAL ──
         async function runGeneration() {
+            if (runGeneration._busy) return;   // trava clique duplo: nao dispara 2 provas
             const keyToUse = window.PROVOU_LEVOU_API_KEY;
             if (!keyToUse || keyToUse.includes("COLOQUE_A_CHAVE_AQUI")) {
                 showError();
@@ -1550,6 +1551,7 @@
             document.getElementById('q-loading-box').style.display = 'flex';
             startLoadingProgress();
 
+            runGeneration._busy = true;
             try {
                 // Guard: re-valida telefone antes de submeter (evita whatsapp vazio)
                 const _finalNums = (phoneInput.value || '').replace(/\D/g, '');
@@ -1641,6 +1643,8 @@ const fd = new FormData();
                 document.getElementById('q-loading-box').style.display = 'none';
                 photoStep.style.display = 'flex';
                 showError();
+            } finally {
+                runGeneration._busy = false;   // libera pra proxima prova
             }
         }
 
