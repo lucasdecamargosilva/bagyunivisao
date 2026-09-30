@@ -294,7 +294,12 @@
         .q-result-pix { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: var(--c-surface); border: 1px solid var(--c-line); }
         .q-result-pix .q-pix-val { font-family: var(--font-body); font-size: 18px; font-weight: 800; color: #0A4DA2; }
         .q-result-pix .q-pix-lbl { font-family: var(--font-body); font-size: 12px; color: #0A4DA2; font-weight: 500; }
-        .q-result-installment { display: flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 13px; color: var(--c-ink); margin-top: 8px; }
+        .q-result-installment { display: flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 13px; color: var(--c-ink); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--c-line); }
+        .q-pr-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+        .q-pr-old { font-family: var(--font-body); font-size: 13px; color: var(--c-muted); text-decoration: line-through; font-weight: 400; letter-spacing: 0; }
+        .q-pr-big { font-family: var(--font-body); font-size: 28px; font-weight: 800; color: #0A4DA2; line-height: 1.1; letter-spacing: 0; }
+        .q-pr-sub { font-family: var(--font-body); font-size: 12px; color: var(--c-muted); font-weight: 400; letter-spacing: 0; margin-top: 2px; }
+        .q-pr-tag { background: #16a34a; color: #fff; font-family: var(--font-body); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
         .q-result-installment i { font-size: 16px; color: #0A4DA2; }
         .q-result-installment b { font-weight: 700; }
         .q-seals { display: flex; justify-content: flex-start; gap: 30px; margin: 8px 0; padding: 12px 0; border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
@@ -1087,7 +1092,7 @@
         function _fmtParcela(t) {
             var m = t.match(/(\d+)\s*x\s*(?:de\s*)?(R?\$?\s*[\d.,]+)\s*(.*)$/i);
             if (!m) return _esc(t);
-            return 'ou <b>' + m[1] + 'x</b> de <b>' + _esc(m[2].replace(/\s+/g, ' ')) + '</b> ' + _esc(m[3].toLowerCase());
+            return 'ou <b>' + m[1] + 'x de ' + _esc(m[2].replace(/\s+/g, ' ')) + '</b> ' + _esc(m[3].toLowerCase());
         }
         // Preço à vista com desconto (ex.: "R$ 576,00 à vista com desconto")
         function getAVista() {
@@ -1184,9 +1189,20 @@
             var price = getMainPrice();
             var prodName = (document.querySelector('h1.product-name, h1.product__title, h1')?.innerText || document.title || '').trim();
             var nameEl = document.getElementById('q-result-prodname'); if (nameEl) nameEl.textContent = prodName;
-            var priceEl = document.getElementById('q-result-prodprice'); if (priceEl) priceEl.textContent = price || '';
-            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = getInstallment(); instEl.innerHTML = _i ? '<i class="ph ph-credit-card"></i><span>' + _fmtParcela(_i) + '</span>' : ''; instEl.style.display = _i ? 'flex' : 'none'; }
-            var pixEl = document.getElementById('q-result-pix'); if (pixEl) { var _v = getAVista(); pixEl.innerHTML = _v ? '<span class="q-pix-val">' + _v + '</span><span class="q-pix-lbl">à vista com desconto</span>' : ''; pixEl.style.display = _v ? 'flex' : 'none'; }
+            var priceEl = document.getElementById('q-result-prodprice');
+            var _av = getAVista();
+            if (priceEl) {
+                if (_av && price) {
+                    var _pn = _priceToNum(price), _an = _priceToNum(_av);
+                    var _pct = _pn > 0 ? Math.round((1 - _an / _pn) * 100) : 0;
+                    priceEl.innerHTML = '<div class="q-pr-row"><div><div class="q-pr-old">' + _esc(price) + '</div><div class="q-pr-big">' + _esc(_av) + '</div><div class="q-pr-sub">à vista com desconto</div></div>' +
+                        (_pct > 0 ? '<span class="q-pr-tag">-' + _pct + '%</span>' : '') + '</div>';
+                } else {
+                    priceEl.innerHTML = '<div class="q-pr-big">' + _esc(price || '') + '</div>';
+                }
+            }
+            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = getInstallment(); instEl.innerHTML = _i ? '<span>' + _fmtParcela(_i) + ' no cartão</span>' : ''; instEl.style.display = _i ? 'flex' : 'none'; }
+            var pixEl = document.getElementById('q-result-pix'); if (pixEl) pixEl.style.display = 'none';
             var info = document.getElementById('q-result-prodinfo'); if (info && (prodName || price)) info.style.display = 'block';
             var seals = document.getElementById('q-seals'); if (seals) seals.style.display = 'flex';
             btn.style.display = findStoreBuyBtn() ? 'flex' : 'none';
@@ -1268,6 +1284,7 @@
         // "Tentar outra foto" fica ACIMA do "Comprar Agora" (pedido do lojista)
         resultActCol.insertBefore(retryBtn, backBtn);
         resultActCol.insertBefore(buyNowBtn, backBtn);
+        resultActCol.insertBefore(sealsEl, backBtn); // selos abaixo do Comprar (opção 2)
 
         // Related products section
         var relatedSection = document.createElement('div');
