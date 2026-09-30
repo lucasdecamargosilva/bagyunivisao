@@ -321,7 +321,7 @@
         @keyframes q-modal-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         #q-modal-ia {
             display: none; position: fixed; inset: 0; z-index: 999999;
-            background: rgba(250,226,228,0.96);
+            background: rgba(234,241,250,0.96);
             font-family: var(--font-body);
             overflow-y: auto; box-sizing: border-box;
         }
