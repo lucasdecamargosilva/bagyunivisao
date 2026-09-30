@@ -295,19 +295,6 @@
         .q-result-pix .q-pix-val { font-family: var(--font-body); font-size: 18px; font-weight: 800; color: #0A4DA2; }
         .q-result-pix .q-pix-lbl { font-family: var(--font-body); font-size: 12px; color: #0A4DA2; font-weight: 500; }
         .q-result-installment { display: flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 13px; color: var(--c-ink); margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--c-line); }
-        .q-colors { margin-top: 12px; }
-        .q-colors-t { font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--c-ink); margin-bottom: 6px; }
-        .q-colors-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
-        .q-color { flex: 0 0 64px; background: #fff; border: 2px solid var(--c-line); border-radius: 12px; padding: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; font-family: var(--font-body); }
-        .q-color span { width: 100%; aspect-ratio: 1/1; border-radius: 8px; background: #f5f5f5 center/contain no-repeat; display: block; }
-        .q-color em { font-style: normal; font-size: 9.5px; line-height: 1.15; color: var(--c-muted); text-align: center; max-height: 22px; overflow: hidden; }
-        .q-color.on { border-color: #0A4DA2; cursor: default; } .q-color.on em { color: #0A4DA2; font-weight: 600; }
-        .q-color:not(.on):hover { border-color: #083d82; }
-        .q-or { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-family: var(--font-body); font-size: 11px; color: var(--c-muted); }
-        .q-or:before, .q-or:after { content: ""; flex: 1; height: 1px; background: var(--c-line); }
-        .q-btn-wa-buy { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 8px; padding: 13px; border: 0; border-radius: 50px; background: #25D366 !important; color: #fff !important; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; text-transform: none; letter-spacing: 0; }
-        .q-btn-wa-buy:hover { background: #1ebe5b !important; }
-        .q-btn-wa-buy i { font-size: 18px; }
         .q-pr-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
         .q-pr-old { font-family: var(--font-body); font-size: 13px; color: var(--c-muted); text-decoration: line-through; font-weight: 400; letter-spacing: 0; }
         .q-pr-big { font-family: var(--font-body); font-size: 28px; font-weight: 800; color: #0A4DA2; line-height: 1.1; letter-spacing: 0; }
@@ -1183,114 +1170,7 @@
         // funil "Clicou em comprar" do dashboard) e aciona o botão nativo da loja. Na Tray, o
         // #button-buy é um submit que trata a seleção de variação (kit) e redireciona pro
         // carrinho nativamente — por isso NÃO simulamos "adicionado" nem link /carrinho fixo.
-        // ── Cores (variações): na Univisão cada cor é um PRODUTO separado, listado no
-        //    "Veja também" (.product-card[data-product-name]). Casamos pelo código do modelo
-        //    (ex.: VO5676). _variant != null = a última prova foi de outra cor.
-        var _variant = null;
-        var WA_LOJA = '5542988702926';
-        function _modelCode(t) { var m = String(t || '').toUpperCase().match(/\b([A-Z]{1,4}\s?-?\d{3,5}[A-Z]?)\b/); return m ? m[1].replace(/[\s-]/g, '') : ''; }
-        function _pageName() { return ((document.querySelector('h1.product-name, h1.product__title, h1') || {}).innerText || document.title || '').trim(); }
-        function _upImg(src) { return String(src || '').replace(/\/(\d{2,4})_([^/]+\.(jpg|jpeg|png|webp))/i, '/$2'); }
-        function findSiblingColors() {
-            var code = _modelCode(_pageName()); if (!code) return [];
-            var seen = {}, out = [];
-            seen[location.pathname.replace(/\/$/, '')] = 1;
-            document.querySelectorAll('.product-card[data-product-name]').forEach(function (c) {
-                var nm = c.getAttribute('data-product-name') || '';
-                if (_modelCode(nm) !== code) return;
-                var a = c.querySelector('a[href]'); if (!a) return;
-                var path = new URL(a.href, location.href).pathname.replace(/\/$/, '');
-                if (seen[path]) return; seen[path] = 1;
-                var im = c.querySelector('img'); var src = im ? (im.getAttribute('data-src') || im.getAttribute('data-original') || im.src) : '';
-                out.push({ name: nm.trim(), url: a.href, thumb: src });
-            });
-            return out.slice(0, 6);
-        }
-        // "Óculos de Grau Feminino Vogue VO5676 Marrom Havana" -> "Marrom Havana"
-        function _colorLabel(name) {
-            var m = String(name).match(/\b[A-Z]{1,4}\s?-?\d{3,5}[A-Z]?\b\s*(.*)$/i);
-            return (m && m[1].trim()) || name;
-        }
-        async function loadVariant(v) {
-            var html = await fetch(v.url, { credentials: 'include' }).then(function (r) { return r.text(); });
-            var doc = new DOMParser().parseFromString(html, 'text/html');
-            var imgs = [];
-            var og = doc.querySelector('meta[property="og:image"]'); if (og && og.content) imgs.push(og.content);
-            doc.querySelectorAll('.product-gallery img, .product-gallery-main img, [data-zoom-image]').forEach(function (el) {
-                var src = el.getAttribute('data-zoom-image') || el.getAttribute('data-src') || el.getAttribute('src') || '';
-                if (!/img_prod\//i.test(src)) return; src = _upImg(src);
-                if (!imgs.some(function (u) { return u.split('?')[0] === src.split('?')[0]; })) imgs.push(src);
-            });
-            var price = 0;
-            doc.querySelectorAll('script[type="application/ld+json"]').forEach(function (sc) {
-                try {
-                    var j = JSON.parse(sc.textContent); var arr = [].concat(j['@graph'] || j);
-                    arr.forEach(function (o) { var of = o && o.offers; if (of) { var pz = parseFloat([].concat(of)[0].price); if (pz > 0 && !price) price = pz; } });
-                } catch (e) {}
-            });
-            var txt = (doc.body ? doc.body.textContent : '').replace(/\s+/g, ' ');
-            var av = txt.match(/R\$\s*([\d.,]+)\s*(?:à|a)\s*vista/i);
-            var inst = txt.match(/(\d+)\s*x\s*(?:de\s*)?R\$\s*([\d.,]+)\s*(sem juros|com juros)?/i);
-            var fmt = function (n) { return 'R$ ' + n.toFixed(2).replace('.', ','); };
-            var avn = av ? _priceToNum(av[1]) : 0;
-            return {
-                name: v.name, url: v.url, images: imgs.slice(0, 4),
-                price: price ? fmt(price) : '', avista: (avn > 0 && (!price || avn < price)) ? fmt(avn) : '',
-                inst: inst ? (inst[1] + 'x de R$ ' + inst[2] + ' ' + (inst[3] || 'sem juros')) : ''
-            };
-        }
-        function renderColors() {
-            var box = document.getElementById('q-colors'); if (!box) return;
-            var sibs = findSiblingColors();
-            if (!sibs.length) { box.style.display = 'none'; return; }
-            var curName = _variant ? _variant.name : _pageName();
-            var selfThumb = (document.querySelector('meta[property="og:image"]') || {}).content || '';
-            var all = [{ name: _pageName(), url: location.href, thumb: selfThumb, self: true }].concat(sibs);
-            box.innerHTML = '<div class="q-colors-t">Provar em outra cor</div><div class="q-colors-row"></div>';
-            var row = box.querySelector('.q-colors-row');
-            all.forEach(function (c) {
-                var on = c.name === curName;
-                var b = document.createElement('button');
-                b.type = 'button'; b.className = 'q-color' + (on ? ' on' : '');
-                b.title = c.name;
-                var sp = document.createElement('span'); sp.style.backgroundImage = 'url("' + String(c.thumb).replace(/"/g, '%22') + '")';
-                var em = document.createElement('em'); em.textContent = _colorLabel(c.name);
-                b.appendChild(sp); b.appendChild(em);
-                if (!on) b.onclick = function () { tryColor(c); };
-                row.appendChild(b);
-            });
-            box.style.display = 'block';
-        }
-        async function tryColor(c) {
-            if (runGeneration._busy) return;
-            try {
-                stepResult.style.display = 'none'; card.classList.remove('is-result');
-                loadingBox.style.display = 'flex'; startLoadingProgress();
-                _variant = c.self ? null : await loadVariant(c);
-                if (_variant && !_variant.images.length) _variant = null;
-            } catch (e) { _variant = null; }
-            genBtn.onclick();
-        }
-        function _ctxProduct() {
-            if (_variant) return { name: _variant.name, url: _variant.url, price: _variant.price, avista: _variant.avista, inst: _variant.inst };
-            return { name: _pageName(), url: location.href.split('#')[0], price: getMainPrice(), avista: getAVista(), inst: getInstallment() };
-        }
-        function buyWhatsApp() {
-            var p = _ctxProduct();
-            var url = String(p.url).split('?')[0];
-            var msg = 'Olá! Provei o *' + p.name + '* no provador virtual e gostaria de comprar pelo WhatsApp 😊\n' + url;
-            try {
-                fetch(WEBHOOK_BUY_CLICK, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: (phoneInput && phoneInput.value) || '', origin: location.origin, produto: p.name, canal: 'whatsapp' }) }).catch(function () {});
-            } catch (e) {}
-            window.open('https://wa.me/' + WA_LOJA + '?text=' + encodeURIComponent(msg), '_blank');
-        }
-
         function buyNow() {
-            if (_variant) {   // provou outra cor: leva pra página dessa cor
-                try { closeModal(); } catch (e) {}
-                location.href = _variant.url; return;
-            }
             try {
                 var _pe = document.getElementById('q-phone') || document.getElementById('mc-phone') || document.querySelector('#q-modal-ia input[type=tel], input[type=tel]');
                 var _tp = (_pe && _pe.value) || '';
@@ -1306,12 +1186,11 @@
             var btn = document.getElementById('q-btn-buy-now');
             if (!btn) return;
             var succ = document.getElementById('q-buy-success'); if (succ) succ.style.display = 'none';
-            var _cx = _ctxProduct();
-            var price = _cx.price;
-            var prodName = _cx.name;
+            var price = getMainPrice();
+            var prodName = (document.querySelector('h1.product-name, h1.product__title, h1')?.innerText || document.title || '').trim();
             var nameEl = document.getElementById('q-result-prodname'); if (nameEl) nameEl.textContent = prodName;
             var priceEl = document.getElementById('q-result-prodprice');
-            var _av = _cx.avista;
+            var _av = getAVista();
             if (priceEl) {
                 if (_av && price) {
                     var _pn = _priceToNum(price), _an = _priceToNum(_av);
@@ -1322,13 +1201,11 @@
                     priceEl.innerHTML = '<div class="q-pr-big">' + _esc(price || '') + '</div>';
                 }
             }
-            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = _cx.inst; instEl.innerHTML = _i ? '<span>' + _fmtParcela(_i) + ' no cartão</span>' : ''; instEl.style.display = _i ? 'flex' : 'none'; }
+            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = getInstallment(); instEl.innerHTML = _i ? '<span>' + _fmtParcela(_i) + ' no cartão</span>' : ''; instEl.style.display = _i ? 'flex' : 'none'; }
             var pixEl = document.getElementById('q-result-pix'); if (pixEl) pixEl.style.display = 'none';
             var info = document.getElementById('q-result-prodinfo'); if (info && (prodName || price)) info.style.display = 'block';
             var seals = document.getElementById('q-seals'); if (seals) seals.style.display = 'flex';
-            btn.style.display = (_variant || findStoreBuyBtn()) ? 'flex' : 'none';
-            var waB = document.getElementById('q-btn-wa-buy'); if (waB) { waB.onclick = buyWhatsApp; }
-            try { renderColors(); } catch (e) {}
+            btn.style.display = findStoreBuyBtn() ? 'flex' : 'none';
             btn.onclick = buyNow;
         }
 
@@ -1370,9 +1247,6 @@
         prodInfo.appendChild(prodPixEl);
         prodInfo.appendChild(prodInstEl);
         resultActCol.appendChild(prodInfo);
-        var colorsEl = document.createElement('div');
-        colorsEl.id = 'q-colors'; colorsEl.className = 'q-colors'; colorsEl.style.display = 'none';
-        resultActCol.appendChild(colorsEl);
 
         // Contador "provas restantes" também no resultado
         var provasMsgResult = document.createElement('div');
@@ -1393,7 +1267,7 @@
         buyNowBtn.className = 'q-btn-buy-now';
         buyNowBtn.id = 'q-btn-buy-now';
         buyNowBtn.style.display = 'none';
-        buyNowBtn.textContent = 'Comprar no site';
+        buyNowBtn.textContent = 'Comprar Agora';
         var backBtn = document.createElement('button');
         backBtn.className = 'q-btn-outline';
         backBtn.id = 'q-btn-back';
@@ -1410,12 +1284,6 @@
         // "Tentar outra foto" fica ACIMA do "Comprar Agora" (pedido do lojista)
         resultActCol.insertBefore(retryBtn, backBtn);
         resultActCol.insertBefore(buyNowBtn, backBtn);
-        // Opção 1G: "Comprar no site" · ou · "Comprar pelo WhatsApp"
-        var orDiv = document.createElement('div'); orDiv.className = 'q-or'; orDiv.textContent = 'ou';
-        var waBuy = document.createElement('button'); waBuy.type = 'button'; waBuy.id = 'q-btn-wa-buy'; waBuy.className = 'q-btn-wa-buy';
-        waBuy.innerHTML = '<i class="ph-fill ph-whatsapp-logo"></i> Comprar pelo WhatsApp';
-        resultActCol.insertBefore(orDiv, backBtn);
-        resultActCol.insertBefore(waBuy, backBtn);
         resultActCol.insertBefore(sealsEl, backBtn); // selos abaixo do Comprar (opção 2)
 
         // Related products section
@@ -1654,7 +1522,7 @@
         function openModal()  {
             plTrackOpen(); modal.style.display = 'flex'; lockBodyScroll();
             try { _checkProvasRestantes(); } catch (e) {} }
-        function closeModal() { _variant = null; modal.style.display = 'none'; unlockBodyScroll(); 
+        function closeModal() { modal.style.display = 'none'; unlockBodyScroll(); 
             // --- volta pra tela inicial ao fechar (pos-prova) + limpa input p/ 2a foto enviar ---
             try {
                 var _qsr = document.getElementById('q-step-result'); if (_qsr) _qsr.style.display = 'none';
@@ -1964,7 +1832,6 @@
                 document.querySelector('meta[property="og:image"]')?.content ||
                 '';
             var prodName = document.querySelector('h1.product-name, h1.product__title, .product-single__title, h1')?.innerText || document.title;
-            if (_variant) { prodName = _variant.name; prodImg = _variant.images[0] || prodImg; }
 
             stepUpload.style.display = 'none';
             loadingBox.style.display = 'flex';
@@ -1977,7 +1844,7 @@
                 fd.append('whatsapp', '55' + phoneInput.value.replace(/\D/g, ''));
                 fd.append('phone_raw', phoneInput.value);
                 fd.append('product_name', prodName);
-                fd.append('product_url', _variant ? _variant.url : window.location.href);
+                fd.append('product_url', window.location.href);
                 fd.append('product_type', currentProduct.category);
                 fd.append('product_fit', currentProduct.fit);
                 fd.append('api_key', keyToUse);
@@ -2006,7 +1873,6 @@
                         }
                     });
                 } catch (_) {}
-                if (_variant) allProdImgs = _variant.images.slice();
                 allProdImgs = allProdImgs.slice(0, 4);
                 // Produtos com fotos de referência FIXAS (pedido da loja): manda sempre estas, nesta ordem
                 // (a 1ª é a referência principal), no lugar das fotos da galeria.
