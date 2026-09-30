@@ -240,7 +240,7 @@
     const styles = `
 /* PL: borda arredondada do modal */@media(min-width:768px){.q-card-ia,.q-card,#q-card-ia,#q-card,.q-modal-card{border-radius:16px !important;overflow:hidden;}}
         /* ── Fontes ── */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
         :root {
             --c-bg: #ffffff;
@@ -252,8 +252,8 @@
             --c-primary-hover: #083d82;
             --c-accent: #0A4DA2;
             --c-danger: #cc3333;
-            --font-display: 'Montserrat', sans-serif;
-            --font-body: 'Montserrat', sans-serif;
+            --font-display: 'Poppins', sans-serif;
+            --font-body: 'Poppins', sans-serif;
         }
 
         /* ── Trigger (selo sobre foto) ── */
@@ -271,8 +271,8 @@
         .q-btn-trigger-ia img { width: 100%; height: 100%; object-fit: contain; }
         @media (min-width: 768px) { .q-btn-trigger-ia { width: 70px; height: 70px; } }
 
-        /* Fonte da loja (Montserrat) nos controles do modal — input/button/select não herdam */
-        #q-modal-ia, #q-modal-ia input, #q-modal-ia button, #q-modal-ia select, #q-modal-ia textarea { font-family: 'Montserrat', sans-serif; }
+        /* Fonte da loja (Poppins) nos controles do modal — input/button/select não herdam */
+        #q-modal-ia, #q-modal-ia input, #q-modal-ia button, #q-modal-ia select, #q-modal-ia textarea { font-family: 'Poppins', sans-serif; }
 
         /* ── Inline button ── */
         .q-btn-inline-provador {
@@ -280,7 +280,7 @@
             width: 100%; padding: 13px 16px;
             background: transparent; color: var(--c-ink);
             border: 1.5px solid var(--c-ink); border-radius: 14px;
-            font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+            font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
             cursor: pointer; transition: opacity 0.2s;
             margin: 10px 0; box-sizing: border-box;
         }
@@ -291,7 +291,12 @@
         .q-result-prodinfo { text-align: left; margin-bottom: 10px; }
         .q-result-prodname { font-family: var(--font-body); font-size: 20px; font-weight: 700; color: var(--c-ink); line-height: 1.25; margin-bottom: 6px; }
         .q-result-prodprice { font-family: var(--font-display); font-size: 28px; letter-spacing: .5px; font-weight: 700; color: var(--c-ink); line-height: 1; }
-        .q-result-installment { font-family: var(--font-body); font-size: 12px; color: var(--c-muted); margin-top: 4px; letter-spacing: .2px; }
+        .q-result-pix { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: var(--c-surface); border: 1px solid var(--c-line); }
+        .q-result-pix .q-pix-val { font-family: var(--font-body); font-size: 18px; font-weight: 800; color: #0A4DA2; }
+        .q-result-pix .q-pix-lbl { font-family: var(--font-body); font-size: 12px; color: #0A4DA2; font-weight: 500; }
+        .q-result-installment { display: flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 13px; color: var(--c-ink); margin-top: 8px; }
+        .q-result-installment i { font-size: 16px; color: #0A4DA2; }
+        .q-result-installment b { font-weight: 700; }
         .q-seals { display: flex; justify-content: flex-start; gap: 30px; margin: 8px 0; padding: 12px 0; border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
         .q-seal { display: flex; align-items: center; gap: 9px; }
         .q-seal > i { font-size: 24px; color: var(--c-primary, #111111); flex-shrink: 0; }
@@ -1077,6 +1082,27 @@
             return '';
         }
 
+        function _esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+        // "12x de R$ 53,33 Sem juros" -> números em negrito
+        function _fmtParcela(t) {
+            var m = t.match(/(\d+)\s*x\s*(?:de\s*)?(R?\$?\s*[\d.,]+)\s*(.*)$/i);
+            if (!m) return _esc(t);
+            return 'ou <b>' + m[1] + 'x</b> de <b>' + _esc(m[2].replace(/\s+/g, ' ')) + '</b> ' + _esc(m[3].toLowerCase());
+        }
+        // Preço à vista com desconto (ex.: "R$ 576,00 à vista com desconto")
+        function getAVista() {
+            var priceNum = _getLdPrice() || _priceToNum(getMainPrice());
+            var cand = [];
+            document.querySelectorAll('.product-price, .txt-cadaparcelas, [class*="desconto"], [class*="vista"]').forEach(function (el) { cand.push((el.parentElement || el).textContent || ''); });
+            for (var i = 0; i < cand.length; i++) {
+                var m = cand[i].replace(/\s+/g, ' ').match(/R\$\s*([\d.,]+)\s*(?:à|a)\s*vista/i);
+                if (!m) continue;
+                var v = _priceToNum(m[1]);
+                if (v > 0 && (!priceNum || v < priceNum)) return 'R$ ' + v.toFixed(2).replace('.', ',');
+            }
+            return '';
+        }
+
         // ── Detecção de rosto: escolhe, entre as fotos do produto, a que mostra um
         //    ROSTO (modelo usando o óculos) como referência principal pro gerador.
         //    FaceDetector nativo (Chromium) primeiro; MediaPipe via CDN como fallback.
@@ -1159,7 +1185,8 @@
             var prodName = (document.querySelector('h1.product-name, h1.product__title, h1')?.innerText || document.title || '').trim();
             var nameEl = document.getElementById('q-result-prodname'); if (nameEl) nameEl.textContent = prodName;
             var priceEl = document.getElementById('q-result-prodprice'); if (priceEl) priceEl.textContent = price || '';
-            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = getInstallment(); instEl.textContent = _i; instEl.style.display = _i ? 'block' : 'none'; }
+            var instEl = document.getElementById('q-result-installment'); if (instEl) { var _i = getInstallment(); instEl.innerHTML = _i ? '<i class="ph ph-credit-card"></i><span>' + _fmtParcela(_i) + '</span>' : ''; instEl.style.display = _i ? 'flex' : 'none'; }
+            var pixEl = document.getElementById('q-result-pix'); if (pixEl) { var _v = getAVista(); pixEl.innerHTML = _v ? '<span class="q-pix-val">' + _v + '</span><span class="q-pix-lbl">à vista com desconto</span>' : ''; pixEl.style.display = _v ? 'flex' : 'none'; }
             var info = document.getElementById('q-result-prodinfo'); if (info && (prodName || price)) info.style.display = 'block';
             var seals = document.getElementById('q-seals'); if (seals) seals.style.display = 'flex';
             btn.style.display = findStoreBuyBtn() ? 'flex' : 'none';
@@ -1172,7 +1199,7 @@
         var resTitle = document.createElement('span');
         resTitle.className = 'q-res-title';
         resTitle.textContent = 'Veja como ficou em você';
-        stepResult.appendChild(resTitle);
+        // título "Veja como ficou em você" removido a pedido do lojista
         var resultImgCol = document.createElement('div');
         resultImgCol.id = 'q-result-img-col';
         var finalImg = document.createElement('img');
@@ -1197,6 +1224,11 @@
         prodInstEl.id = 'q-result-installment';
         prodInfo.appendChild(prodNameEl);
         prodInfo.appendChild(prodPriceEl);
+        var prodPixEl = document.createElement('div');
+        prodPixEl.className = 'q-result-pix';
+        prodPixEl.id = 'q-result-pix';
+        prodPixEl.style.display = 'none';
+        prodInfo.appendChild(prodPixEl);
         prodInfo.appendChild(prodInstEl);
         resultActCol.appendChild(prodInfo);
 
@@ -1220,8 +1252,6 @@
         buyNowBtn.id = 'q-btn-buy-now';
         buyNowBtn.style.display = 'none';
         buyNowBtn.textContent = 'Comprar Agora';
-        resultActCol.appendChild(buyNowBtn);
-
         var backBtn = document.createElement('button');
         backBtn.className = 'q-btn-outline';
         backBtn.id = 'q-btn-back';
@@ -1235,7 +1265,9 @@
         retryIcon.className = 'ph ph-camera';
         retryBtn.appendChild(retryIcon);
         retryBtn.appendChild(document.createTextNode(' Tentar outra foto'));
-        resultActCol.appendChild(retryBtn);
+        // "Tentar outra foto" fica ACIMA do "Comprar Agora" (pedido do lojista)
+        resultActCol.insertBefore(retryBtn, backBtn);
+        resultActCol.insertBefore(buyNowBtn, backBtn);
 
         // Related products section
         var relatedSection = document.createElement('div');
