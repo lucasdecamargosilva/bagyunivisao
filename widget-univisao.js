@@ -1940,7 +1940,7 @@
         // detalhe deste tema e evita inicializar o modal fora de um produto.
         var isProduct =
             window.__MC_FORCE_INIT__ === true ||
-            document.querySelector('h1.product-name') !== null;
+            document.querySelector('h1.product-name, #button-buy') !== null;
 
         if (isProduct) {
             init();
@@ -1948,7 +1948,7 @@
             var tries = 0;
             var iv = setInterval(function() {
                 tries++;
-                if (document.querySelector('h1.product-name') !== null) {
+                if (document.querySelector('h1.product-name, #button-buy') !== null) {
                     clearInterval(iv);
                     init();
                 } else if (tries >= 10) {
