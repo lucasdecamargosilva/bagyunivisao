@@ -246,7 +246,7 @@
             --c-bg: #ffffff;
             --c-surface: #eaf1fa;
             --c-ink: #171717;
-            --c-muted: #7f7475;
+            --c-muted: #6E6E6E;
             --c-line: #cfe0f2;
             --c-primary: #0A4DA2;
             --c-primary-hover: #083d82;
@@ -708,7 +708,7 @@
         .q-btn-inline-provador:hover { background: transparent; color: #083d82; border-color: #083d82; opacity: 1; }
         .q-btn-black { background: #0A4DA2 !important; color: #ffffff !important; }
         .q-btn-black:hover:not(:disabled) { background: #083d82 !important; opacity: 1; }
-        .q-btn-black:disabled { background: #ead5d6 !important; color: #ffffff !important; }
+        .q-btn-black:disabled { background: #b9cde6 !important; color: #ffffff !important; }
         .q-btn-buy-now { background: #0A4DA2 !important; border-color: #0A4DA2 !important; }
         .q-btn-buy-now:hover { background: #083d82 !important; border-color: #083d82 !important; }
         .q-face-corner { border-color: #0A4DA2 !important; }
@@ -719,8 +719,8 @@
         .q-input:focus { border-color: #0A4DA2 !important; box-shadow: 0 0 0 3px rgba(10,77,162,0.2); }
         .q-loading-bar > div { background: #0A4DA2 !important; }
         .q-tip-box { background: #eaf1fa !important; border-left-color: #0A4DA2 !important; color: #1a1a1a !important; }
-        .q-tip-box i { color: #d87980 !important; }
-        .q-seal > i { color: #d87980; }
+        .q-tip-box i { color: #0A4DA2 !important; }
+        .q-seal > i { color: #0A4DA2; }
         .q-powered-footer { background: #eaf1fa; }
         #q-related-products h4 { color: #0A4DA2 !important; }
         .q-quantic-logo { height: 20px; opacity: 0.7; }
