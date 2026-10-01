@@ -152,7 +152,7 @@
 
     const WEBHOOK_BUY_CLICK = 'https://n8n.segredosdodrop.com/webhook/pl-provador-buy-click';
 
-    const STORE_WHATSAPP = '5512996642840'; // WhatsApp da loja (12) 99664-2840
+    const STORE_WHATSAPP = '5542988702926'; // WhatsApp da loja (42) 98870-2926
 
     const WEBHOOK_PIX = 'https://n8n.segredosdodrop.com/webhook/cacife-pix';
 
