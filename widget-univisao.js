@@ -1868,7 +1868,7 @@
 
         pixSub.className = 'q-pix-subtitle';
 
-        var pixSubLine1 = document.createTextNode('Limite de 5 provas atingido.');
+        var pixSubLine1 = document.createTextNode('Limite de provas de hoje atingido.');
 
         pixSub.appendChild(pixSubLine1);
 
