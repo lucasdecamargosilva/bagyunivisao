@@ -2145,6 +2145,11 @@
             var priceNum = _getLdPrice() || _priceToNum(getMainPrice());
 
             if (!priceNum || priceNum <= 0) return '';
+            // 16/11/2026 (tema Match GO da Bagy): o JSON-LD traz o preço À VISTA (639) e a parcela fecha no
+            // preço CHEIO (12x 59,17 = 710). Aceita parcela que case com qualquer um dos dois.
+            var _precos = [priceNum, _priceToNum(getMainPrice())];
+            try { document.querySelectorAll('.product-price, .produto-preco').forEach(function (el) { if (el.closest('#q-modal-ia')) return; (el.textContent || '').replace(/\s+/g, ' ').replace(/R\$\s*([\d.]+,\d{2})/g, function (_, v) { _precos.push(_priceToNum(v)); }); }); } catch (e) {}
+            _precos = _precos.filter(function (x) { return x > 0; });
 
             // Candidatos = elementos de parcela + o PAI de cada .txt-cadaparcelas. Na Tray
 
@@ -2159,6 +2164,7 @@
             document.querySelectorAll('.product-installments, .txt-corparcelas, [class*="parcela"]').forEach(function (el) { cand.push(el.textContent || ''); });
 
             document.querySelectorAll('.txt-cadaparcelas').forEach(function (el) { if (el.parentElement) cand.push(el.parentElement.textContent || ''); });
+            document.querySelectorAll('.sama-price-ready, .product-price, .produto-preco').forEach(function (el) { if (!el.closest('#q-modal-ia')) cand.push(el.textContent || ''); });
 
             var tol = Math.max(0.5, priceNum * 0.02); // tolerância p/ arredondamento das parcelas
 
@@ -2169,6 +2175,7 @@
                 var m = t.match(/(\d+)\s*x\s*(?:de\s*)?R?\$?\s*([\d.,]+)/i);
 
                 if (!m) continue;
+                t = t.slice(m.index).replace(/\s*\+?\s*ver todas.*$/i, '').trim();
 
                 var n = parseInt(m[1], 10), v = _priceToNum(m[2]);
 
@@ -2176,7 +2183,7 @@
 
                 var clean = t.replace(/^(ou|em at[ée])\s*/i, '').replace(/(sem juros|com juros).*/i, '$1').trim();
 
-                if (Math.abs(n * v - priceNum) <= tol) return clean; // total casa com o preço -> essa é a certa
+                if (_precos.some(function (p) { return Math.abs(n * v - p) <= Math.max(0.5, p * 0.02); })) return clean; // total casa com o preço -> essa é a certa
 
             }
 
@@ -4107,7 +4114,11 @@
             '.pl-rl-wa { display: flex !important; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 8px; padding: 14px; border: 0; border-radius: 50px; background: #25D366 !important; color: #fff !important; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; text-transform: none; letter-spacing: 0; box-sizing: border-box; }' +
             '.pl-rl-wa:hover { background: #1ebe5b !important; }' +
             '.pl-rl-wa svg { width: 18px; height: 18px; flex-shrink: 0; }' +
-            '.pl-rl-retry { margin-top: 10px !important; }' +
+            '.pl-rl-retry { margin-top: 0 !important; }' +
+            /* 16/11/2026 (Lucas): resultado limpo — sem "provas restantes", Comprar e Provar outra foto colados */
+            '#q-result-actions-col .q-provas-msg, #q-provas-restantes-result { display: none !important; }' +
+            '#q-result-actions-col { gap: 10px !important; }' +
+            '#q-btn-buy-now.pl-rl-buy { margin-bottom: 0 !important; }' +
             /* os 3 botões SEMPRE no mesmo formato (só a cor muda) */
             '#q-btn-buy-now.pl-rl-buy, #pl-rl-wa.pl-rl-wa, .pl-rl-retry { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; width: 100% !important; min-height: 50px !important; height: auto !important; padding: 12px 16px !important; box-sizing: border-box !important; border-radius: 50px !important; font-family: inherit !important; font-size: 15px !important; font-weight: 600 !important; line-height: 1.2 !important; text-transform: none !important; letter-spacing: 0 !important; text-decoration: none !important; box-shadow: none !important; }' +
             '.pl-rl-retry { background: #fff !important; color: var(--c-ink, #111) !important; border: 1.5px solid var(--c-line, #d9d9d9) !important; }' +
